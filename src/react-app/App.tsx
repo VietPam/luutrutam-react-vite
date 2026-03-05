@@ -20,12 +20,16 @@ import { showNotification } from "./features/notification/notificationSlice"
 
 import NotificationProvider from "./features/notification/NotificationProvider"
 
+import {
+	getNotes,
+	addNoteApi,
+	deleteNoteApi
+} from "./features/notes/api/notesApi"
+
 type Note = {
 	id: string
 	text: string
 }
-
-const API_URL = "https://luutrutam-api.20522153.workers.dev"
 
 function App() {
 	const dispatch = useDispatch()
@@ -36,10 +40,9 @@ function App() {
 
 	const loadNotes = async () => {
 		try {
-			const res = await fetch(API_URL)
-			const data = await res.json()
+			const data = await getNotes()
 			setNotes(data.reverse())
-		} catch (e) {
+		} catch {
 			dispatch(
 				showNotification({
 					message: "Failed to load notes",
@@ -60,24 +63,18 @@ function App() {
 		setLoading(true)
 
 		try {
-			const res = await fetch(API_URL, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "add", text: value })
-			})
+			await addNoteApi(value)
 
-			if (res.ok) {
-				setText("")
-				await loadNotes()
+			setText("")
+			await loadNotes()
 
-				dispatch(
-					showNotification({
-						message: "Note added successfully",
-						type: "success"
-					})
-				)
-			}
-		} catch (e) {
+			dispatch(
+				showNotification({
+					message: "Note added successfully",
+					type: "success"
+				})
+			)
+		} catch {
 			dispatch(
 				showNotification({
 					message: "Error adding note",
@@ -93,23 +90,17 @@ function App() {
 		if (!confirm("Delete this note?")) return
 
 		try {
-			const res = await fetch(API_URL, {
-				method: "POST",
-				headers: { "Content-Type": "application/json" },
-				body: JSON.stringify({ action: "delete", id })
-			})
+			await deleteNoteApi(id)
 
-			if (res.ok) {
-				await loadNotes()
+			await loadNotes()
 
-				dispatch(
-					showNotification({
-						message: "Note deleted",
-						type: "success"
-					})
-				)
-			}
-		} catch (e) {
+			dispatch(
+				showNotification({
+					message: "Note deleted",
+					type: "success"
+				})
+			)
+		} catch {
 			dispatch(
 				showNotification({
 					message: "Error deleting note",
