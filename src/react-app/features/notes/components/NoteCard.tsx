@@ -8,15 +8,13 @@ import {
 } from "@mui/material"
 import ContentCopyIcon from "@mui/icons-material/ContentCopy"
 import DeleteIcon from "@mui/icons-material/Delete"
-
+import { Note } from "../types/note"
 type Props = {
-	id: string
-	text: string
-	onCopy: (text: string) => void
-	onDelete: (id: string) => void
+  note: Note
+  onCopy: (content: string) => void
+  onDelete: (id: string) => void
 }
-
-function NoteCard({ id, text, onCopy, onDelete }: Props) {
+function NoteCard({ note, onCopy, onDelete }: Props) {
 	return (
 		<Card>
 			<CardContent>
@@ -33,20 +31,20 @@ function NoteCard({ id, text, onCopy, onDelete }: Props) {
 							flex: 1
 						}}
 					>
-						{text}
+						{note.text}
 					</Typography>
 
 					<Box>
 						<IconButton
 							color="primary"
-							onClick={() => onCopy(text)}
+							onClick={() => onCopy(note.text)}
 						>
 							<ContentCopyIcon />
 						</IconButton>
 
 						<IconButton
 							color="error"
-							onClick={() => onDelete(id)}
+							onClick={() => onDelete(note.id)}
 						>
 							<DeleteIcon />
 						</IconButton>

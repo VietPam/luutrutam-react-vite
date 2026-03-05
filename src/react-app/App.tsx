@@ -22,13 +22,8 @@ import {
 	addNoteApi,
 	deleteNoteApi
 } from "./features/notes/api/notesApi"
-
-import NoteCard from "./features/notes/components/NoteCard"
-
-type Note = {
-	id: string
-	text: string
-}
+import NotesList from "./features/notes/components/NotesList"
+import { Note } from "./features/notes/types/note"
 
 function App() {
 	const dispatch = useDispatch()
@@ -154,24 +149,11 @@ function App() {
 						</CardContent>
 					</Card>
 
-					<Box>
-						<Typography variant="h6" sx={{ mb: 2 }}>
-							Existing Notes
-						</Typography>
-
-						<Grid container spacing={2}>
-							{notes.map((note) => (
-								<Grid size={12} key={note.id}>
-									<NoteCard
-										id={note.id}
-										text={note.text}
-										onCopy={copyText}
-										onDelete={deleteNote}
-									/>
-								</Grid>
-							))}
-						</Grid>
-					</Box>
+					<NotesList
+						notes={notes}
+						onCopy={copyText}
+						onDelete={deleteNote}
+					/>
 				</Stack>
 			</Container>
 		</>
