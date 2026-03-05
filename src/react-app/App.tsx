@@ -1,66 +1,82 @@
-// src/App.tsx
-
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
-import cloudflareLogo from "./assets/Cloudflare_Logo.svg";
-import honoLogo from "./assets/hono.svg";
-import "./App.css";
+import { useState } from "react"
+import reactLogo from "./assets/react.svg"
+import viteLogo from "/vite.svg"
+import cloudflareLogo from "./assets/Cloudflare_Logo.svg"
+import honoLogo from "./assets/hono.svg"
+import { Container, Typography, Box, Stack, Card, CardContent, Button } from "@mui/material"
 
 function App() {
-	const [count, setCount] = useState(0);
-	const [name, setName] = useState("unknown");
+	const [count, setCount] = useState(0)
+	const [name, setName] = useState("unknown")
+
+	const getName = async () => {
+		const res = await fetch("/api/")
+		const data = (await res.json()) as { name: string }
+		setName(data.name)
+	}
 
 	return (
-		<>
-			<div>
-				<a href="https://vite.dev" target="_blank">
-					<img src={viteLogo} className="logo" alt="Vite logo" />
-				</a>
-				<a href="https://react.dev" target="_blank">
-					<img src={reactLogo} className="logo react" alt="React logo" />
-				</a>
-				<a href="https://hono.dev/" target="_blank">
-					<img src={honoLogo} className="logo cloudflare" alt="Hono logo" />
-				</a>
-				<a href="https://workers.cloudflare.com/" target="_blank">
-					<img
-						src={cloudflareLogo}
-						className="logo cloudflare"
-						alt="Cloudflare logo"
-					/>
-				</a>
-			</div>
-			<h1>Vite + React + Hono + Cloudflare</h1>
-			<div className="card">
-				<button
-					onClick={() => setCount((count) => count + 1)}
-					aria-label="increment"
-				>
-					count is {count}
-				</button>
-				<p>
-					Edit <code>src/App.tsx</code> and save to test HMR
-				</p>
-			</div>
-			<div className="card">
-				<button
-					onClick={() => {
-						fetch("/api/")
-							.then((res) => res.json() as Promise<{ name: string }>)
-							.then((data) => setName(data.name));
-					}}
-					aria-label="get name"
-				>
-					Name from API is: {name}
-				</button>
-				<p>
-					Edit <code>worker/index.ts</code> to change the name
-				</p>
-			</div>
-			<p className="read-the-docs">Click on the logos to learn more</p>
-		</>
-	);
+		<Container maxWidth="md" sx={{ mt: 6 }}>
+			<Stack spacing={4} alignItems="center">
+				<Box sx={{ display: "flex", gap: 4 }}>
+					<a href="https://vite.dev" target="_blank">
+						<img src={viteLogo} height={64} />
+					</a>
+					<a href="https://react.dev" target="_blank">
+						<img src={reactLogo} height={64} />
+					</a>
+					<a href="https://hono.dev/" target="_blank">
+						<img src={honoLogo} height={64} />
+					</a>
+					<a href="https://workers.cloudflare.com/" target="_blank">
+						<img src={cloudflareLogo} height={64} />
+					</a>
+				</Box>
+
+				<Typography variant="h3">
+					Vite + React + Hono + Cloudflare
+				</Typography>
+
+				<Card sx={{ width: "100%" }}>
+					<CardContent>
+						<Stack spacing={2} alignItems="center">
+							<Button
+								variant="contained"
+								onClick={() => setCount((c) => c + 1)}
+							>
+								count is {count}
+							</Button>
+
+							<Typography>
+								Edit <code>src/App.tsx</code> and save to test HMR
+							</Typography>
+						</Stack>
+					</CardContent>
+				</Card>
+
+				<Card sx={{ width: "100%" }}>
+					<CardContent>
+						<Stack spacing={2} alignItems="center">
+							<Button
+								variant="contained"
+								onClick={getName}
+							>
+								Name from API is: {name}
+							</Button>
+
+							<Typography>
+								Edit <code>worker/index.ts</code> to change the name
+							</Typography>
+						</Stack>
+					</CardContent>
+				</Card>
+
+				<Typography color="text.secondary">
+					Click on the logos to learn more
+				</Typography>
+			</Stack>
+		</Container>
+	)
 }
 
-export default App;
+export default App
