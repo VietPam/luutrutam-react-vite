@@ -1,79 +1,173 @@
-import { useState } from "react"
-import reactLogo from "./assets/react.svg"
-import viteLogo from "/vite.svg"
-import cloudflareLogo from "./assets/Cloudflare_Logo.svg"
-import honoLogo from "./assets/hono.svg"
-import { Container, Typography, Box, Stack, Card, CardContent, Button } from "@mui/material"
+import { useEffect, useState } from "react"
+import {
+	Container,
+	Typography,
+	Box,
+	Stack,
+	Card,
+	CardContent,
+	TextField,
+	Button,
+	IconButton,
+	Grid
+} from "@mui/material"
+import ContentCopyIcon from "@mui/icons-material/ContentCopy"
+import DeleteIcon from "@mui/icons-material/Delete"
+import AddIcon from "@mui/icons-material/Add"
+
+type Note = {
+	id: string
+	text: string
+}
+
+const API_URL = "https://luutrutam-api.20522153.workers.dev"
 
 function App() {
-	const [count, setCount] = useState(0)
-	const [name, setName] = useState("unknown")
+	const [notes, setNotes] = useState<Note[]>([])
+	const [text, setText] = useState("")
+	const [loading, setLoading] = useState(false)
 
-	const getName = async () => {
-		const res = await fetch("/api/")
-		const data = (await res.json()) as { name: string }
-		setName(data.name)
+	const loadNotes = async () => {
+		try {
+			const res = await fetch(API_URL)
+			const data = await res.json()
+			setNotes(data.reverse())
+		} catch (e) {
+			console.error(e)
+		}
+	}
+
+	useEffect(() => {
+		loadNotes()
+	}, [])
+
+	const addNote = async () => {
+		const value = text.trim()
+		if (!value) return
+
+		setLoading(true)
+
+		try {
+			const res = await fetch(API_URL, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ action: "add", text: value })
+			})
+
+			if (res.ok) {
+				setText("")
+				await loadNotes()
+			}
+		} catch (e) {
+			alert("Error adding note")
+		}
+
+		setLoading(false)
+	}
+
+	const deleteNote = async (id: string) => {
+		if (!confirm("Delete this note?")) return
+
+		try {
+			const res = await fetch(API_URL, {
+				method: "POST",
+				headers: { "Content-Type": "application/json" },
+				body: JSON.stringify({ action: "delete", id })
+			})
+
+			if (res.ok) {
+				await loadNotes()
+			}
+		} catch (e) {
+			alert("Error deleting note")
+		}
+	}
+
+	const copyText = async (value: string) => {
+		await navigator.clipboard.writeText(value)
 	}
 
 	return (
 		<Container maxWidth="md" sx={{ mt: 6 }}>
-			<Stack spacing={4} alignItems="center">
-				<Box sx={{ display: "flex", gap: 4 }}>
-					<a href="https://vite.dev" target="_blank">
-						<img src={viteLogo} height={64} />
-					</a>
-					<a href="https://react.dev" target="_blank">
-						<img src={reactLogo} height={64} />
-					</a>
-					<a href="https://hono.dev/" target="_blank">
-						<img src={honoLogo} height={64} />
-					</a>
-					<a href="https://workers.cloudflare.com/" target="_blank">
-						<img src={cloudflareLogo} height={64} />
-					</a>
+			<Stack spacing={4}>
+
+				<Typography variant="h4">
+					Temp Text Board
+				</Typography>
+
+				<Card>
+					<CardContent>
+						<Stack spacing={2}>
+							<TextField
+								multiline
+								minRows={3}
+								value={text}
+								onChange={(e) => setText(e.target.value)}
+								placeholder="Paste content here..."
+								fullWidth
+							/>
+
+							<Button
+								variant="contained"
+								startIcon={<AddIcon />}
+								onClick={addNote}
+								disabled={loading}
+							>
+								Add Note
+							</Button>
+						</Stack>
+					</CardContent>
+				</Card>
+
+				<Box>
+					<Typography variant="h6" sx={{ mb: 2 }}>
+						Existing Notes
+					</Typography>
+
+					<Grid container spacing={2}>
+						{notes.map((note) => (
+							<Grid size={12} key={note.id}>
+								<Card>
+									<CardContent>
+										<Stack
+											direction="row"
+											justifyContent="space-between"
+											alignItems="center"
+											spacing={2}
+										>
+											<Typography
+												sx={{
+													whiteSpace: "pre-wrap",
+													wordBreak: "break-word",
+													flex: 1
+												}}
+											>
+												{note.text}
+											</Typography>
+
+											<Box>
+												<IconButton
+													color="primary"
+													onClick={() => copyText(note.text)}
+												>
+													<ContentCopyIcon />
+												</IconButton>
+
+												<IconButton
+													color="error"
+													onClick={() => deleteNote(note.id)}
+												>
+													<DeleteIcon />
+												</IconButton>
+											</Box>
+										</Stack>
+									</CardContent>
+								</Card>
+							</Grid>
+						))}
+					</Grid>
 				</Box>
 
-				<Typography variant="h3">
-					Vite + React + Hono + Cloudflare
-				</Typography>
-
-				<Card sx={{ width: "100%" }}>
-					<CardContent>
-						<Stack spacing={2} alignItems="center">
-							<Button
-								variant="contained"
-								onClick={() => setCount((c) => c + 1)}
-							>
-								count is {count}
-							</Button>
-
-							<Typography>
-								Edit <code>src/App.tsx</code> and save to test HMR
-							</Typography>
-						</Stack>
-					</CardContent>
-				</Card>
-
-				<Card sx={{ width: "100%" }}>
-					<CardContent>
-						<Stack spacing={2} alignItems="center">
-							<Button
-								variant="contained"
-								onClick={getName}
-							>
-								Name from API is: {name}
-							</Button>
-
-							<Typography>
-								Edit <code>worker/index.ts</code> to change the name
-							</Typography>
-						</Stack>
-					</CardContent>
-				</Card>
-
-				<Typography color="text.secondary">
-					Click on the logos to learn more
-				</Typography>
 			</Stack>
 		</Container>
 	)
