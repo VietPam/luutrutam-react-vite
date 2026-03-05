@@ -8,11 +8,8 @@ import {
 	CardContent,
 	TextField,
 	Button,
-	IconButton,
 	Grid
 } from "@mui/material"
-import ContentCopyIcon from "@mui/icons-material/ContentCopy"
-import DeleteIcon from "@mui/icons-material/Delete"
 import AddIcon from "@mui/icons-material/Add"
 
 import { useDispatch } from "react-redux"
@@ -25,6 +22,8 @@ import {
 	addNoteApi,
 	deleteNoteApi
 } from "./features/notes/api/notesApi"
+
+import NoteCard from "./features/notes/components/NoteCard"
 
 type Note = {
 	id: string
@@ -163,42 +162,12 @@ function App() {
 						<Grid container spacing={2}>
 							{notes.map((note) => (
 								<Grid size={12} key={note.id}>
-									<Card>
-										<CardContent>
-											<Stack
-												direction="row"
-												justifyContent="space-between"
-												alignItems="center"
-												spacing={2}
-											>
-												<Typography
-													sx={{
-														whiteSpace: "pre-wrap",
-														wordBreak: "break-word",
-														flex: 1
-													}}
-												>
-													{note.text}
-												</Typography>
-
-												<Box>
-													<IconButton
-														color="primary"
-														onClick={() => copyText(note.text)}
-													>
-														<ContentCopyIcon />
-													</IconButton>
-
-													<IconButton
-														color="error"
-														onClick={() => deleteNote(note.id)}
-													>
-														<DeleteIcon />
-													</IconButton>
-												</Box>
-											</Stack>
-										</CardContent>
-									</Card>
+									<NoteCard
+										id={note.id}
+										text={note.text}
+										onCopy={copyText}
+										onDelete={deleteNote}
+									/>
 								</Grid>
 							))}
 						</Grid>
