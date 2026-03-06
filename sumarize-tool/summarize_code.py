@@ -1,10 +1,21 @@
 import os
+import re
 from pathlib import Path
 
 SOURCE_EXTENSIONS = [".ts", ".tsx"]
 OUTPUT_FOLDER = "output"
 OUTPUT_FILE = "all_code.txt"
 COMPRESS_OUTPUT = True
+
+def remove_comments(content):
+    pattern = r'(\".*?\"|\'.*?\'|\`.*?\`)|(/\*.*?\*/|//[^\n]*)'
+
+    def replacer(match):
+        if match.group(2) is not None:
+            return ""
+        return match.group(1)
+
+    return re.sub(pattern, replacer, content, flags=re.DOTALL)
 
 def compress_code(content):
     lines = content.splitlines()
@@ -39,6 +50,7 @@ def read_file_content(file_path):
                     break
                 lines.append(line)
             return "".join(lines)
+
     with open(file_path, "r", encoding="utf-8") as f:
         return f.read()
 
@@ -49,7 +61,9 @@ def write_output(files, base_dir, output_dir):
     with open(output_path, "w", encoding="utf-8") as out:
         for file_path in sorted(files):
             relative_path = file_path.relative_to(base_dir)
+
             content = read_file_content(file_path)
+            content = remove_comments(content)
 
             if COMPRESS_OUTPUT:
                 content = compress_code(content)
