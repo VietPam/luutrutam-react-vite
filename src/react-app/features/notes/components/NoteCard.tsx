@@ -12,7 +12,7 @@ type Props = {
   onDelete: (id: string) => void;
 };
 
-function NoteCard({ note, onCopy, onDelete }: Props) {
+function NoteCard({ note, onCopy }: Props) {
   const dispatch = useDispatch();
 
   const handleDeleteClick = () => {
