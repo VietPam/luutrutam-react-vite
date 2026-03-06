@@ -1,4 +1,4 @@
-const API_URL = "https://luutrutam-api.20522153.workers.dev"
+const API_URL = "https://luutrutam-api-v3.20522153.workers.dev/notes"
 
 export const getNotes = async () => {
 	const res = await fetch(API_URL)
