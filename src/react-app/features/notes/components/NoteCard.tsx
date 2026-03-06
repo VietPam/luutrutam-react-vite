@@ -9,7 +9,6 @@ import { Note } from "../types/note";
 type Props = {
   note: Note;
   onCopy: (content: string) => void;
-  onDelete: (id: string) => void;
 };
 
 function NoteCard({ note, onCopy }: Props) {

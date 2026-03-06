@@ -1,15 +1,29 @@
 /* FILE: src/react-app/features/notes/components/CreateNoteArea.tsx */
+import { useState } from "react"
 import { Card, CardContent, Stack, TextField, Button } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
+import { useDispatch, useSelector } from "react-redux"
+import { AppDispatch, RootState } from "../../../app/store"
+import { createNote } from "../notesSlice"
 
-interface CreateNoteAreaProps {
-  text: string
-  setText: (val: string) => void
-  onAdd: () => void
-  loading: boolean
-}
+export default function CreateNoteArea() {
+  const dispatch = useDispatch<AppDispatch>()
+  const { loading } = useSelector((state: RootState) => state.notes)
+  const [text, setText] = useState("")
 
-export default function CreateNoteArea({ text, setText, onAdd, loading }: CreateNoteAreaProps) {
+  const handleAddNote = async () => {
+    const value = text.trim()
+    if (!value) return
+
+    try {
+      // Dispatch thunk trực tiếp tại đây
+      await dispatch(createNote(value)).unwrap()
+      setText("") // Reset form sau khi thành công
+    } catch {
+      // Error đã được thunk handle qua notification
+    }
+  }
+
   return (
     <Card variant="outlined">
       <CardContent>
@@ -25,7 +39,7 @@ export default function CreateNoteArea({ text, setText, onAdd, loading }: Create
           <Button
             variant="contained"
             startIcon={<AddIcon />}
-            onClick={onAdd}
+            onClick={handleAddNote}
             disabled={loading}
             disableElevation
           >
