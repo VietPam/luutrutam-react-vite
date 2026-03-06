@@ -1,163 +1,116 @@
 import { useEffect, useState } from "react"
-import {
-	Container,
-	Typography,
-	Box,
-	Stack,
-	Card,
-	CardContent,
-	TextField,
-	Button,
-	Grid
-} from "@mui/material"
+import { Container, Typography, Stack, Card, CardContent, TextField, Button } from "@mui/material"
 import AddIcon from "@mui/icons-material/Add"
-
 import { useDispatch } from "react-redux"
 import { showNotification } from "./features/notification/notificationSlice"
-
 import NotificationProvider from "./features/notification/NotificationProvider"
-
-import {
-	getNotes,
-	addNoteApi,
-	deleteNoteApi
-} from "./features/notes/api/notesApi"
+import { getNotes, addNoteApi, deleteNoteApi } from "./features/notes/api/notesApi"
 import NotesList from "./features/notes/components/NotesList"
 import { Note } from "./features/notes/types/note"
+import ModalManager from "./features/modal/ModalManager"
 
 function App() {
-	const dispatch = useDispatch()
+  const dispatch = useDispatch()
+  const [notes, setNotes] = useState<Note[]>([])
+  const [text, setText] = useState("")
+  const [loading, setLoading] = useState(false)
 
-	const [notes, setNotes] = useState<Note[]>([])
-	const [text, setText] = useState("")
-	const [loading, setLoading] = useState(false)
+  const loadNotes = async () => {
+    try {
+      const data = await getNotes()
+      setNotes(data.reverse())
+    } catch {
+      dispatch(
+        showNotification({ message: "Failed to load notes", type: "error" })
+      )
+    }
+  }
 
-	const loadNotes = async () => {
-		try {
-			const data = await getNotes()
-			setNotes(data.reverse())
-		} catch {
-			dispatch(
-				showNotification({
-					message: "Failed to load notes",
-					type: "error"
-				})
-			)
-		}
-	}
+  useEffect(() => {
+    loadNotes()
+  }, [])
 
-	useEffect(() => {
-		loadNotes()
-	}, [])
+  const addNote = async () => {
+    const value = text.trim()
+    if (!value) return
 
-	const addNote = async () => {
-		const value = text.trim()
-		if (!value) return
+    setLoading(true)
 
-		setLoading(true)
+    try {
+      await addNoteApi(value)
+      setText("")
+      await loadNotes()
+      dispatch(
+        showNotification({ message: "Note added successfully", type: "success" })
+      )
+    } catch {
+      dispatch(
+        showNotification({ message: "Error adding note", type: "error" })
+      )
+    }
 
-		try {
-			await addNoteApi(value)
+    setLoading(false)
+  }
 
-			setText("")
-			await loadNotes()
+  const deleteNote = async (id: string) => {
+    try {
+      await deleteNoteApi(id)
+      await loadNotes()
+      dispatch(
+        showNotification({ message: "Note deleted", type: "success" })
+      )
+    } catch {
+      dispatch(
+        showNotification({ message: "Error deleting note", type: "error" })
+      )
+    }
+  }
 
-			dispatch(
-				showNotification({
-					message: "Note added successfully",
-					type: "success"
-				})
-			)
-		} catch {
-			dispatch(
-				showNotification({
-					message: "Error adding note",
-					type: "error"
-				})
-			)
-		}
+  const copyText = async (value: string) => {
+    await navigator.clipboard.writeText(value)
+    dispatch(
+      showNotification({ message: "Copied to clipboard", type: "info" })
+    )
+  }
 
-		setLoading(false)
-	}
+  return (
+    <>
+      <NotificationProvider />
+      <ModalManager />
 
-	const deleteNote = async (id: string) => {
-		if (!confirm("Delete this note?")) return
+      <Container maxWidth="md" sx={{ mt: 6 }}>
+        <Stack spacing={4}>
+          <Typography variant="h4">Temp Text Board</Typography>
 
-		try {
-			await deleteNoteApi(id)
+          <Card>
+            <CardContent>
+              <Stack spacing={2}>
+                <TextField
+                  multiline
+                  minRows={3}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Paste content here..."
+                  fullWidth
+                />
 
-			await loadNotes()
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={addNote}
+                  disabled={loading}
+                >
+                  Add Note
+                </Button>
+              </Stack>
+            </CardContent>
+          </Card>
 
-			dispatch(
-				showNotification({
-					message: "Note deleted",
-					type: "success"
-				})
-			)
-		} catch {
-			dispatch(
-				showNotification({
-					message: "Error deleting note",
-					type: "error"
-				})
-			)
-		}
-	}
-
-	const copyText = async (value: string) => {
-		await navigator.clipboard.writeText(value)
-
-		dispatch(
-			showNotification({
-				message: "Copied to clipboard",
-				type: "info"
-			})
-		)
-	}
-
-	return (
-		<>
-			<NotificationProvider />
-
-			<Container maxWidth="md" sx={{ mt: 6 }}>
-				<Stack spacing={4}>
-					<Typography variant="h4">
-						Temp Text Board
-					</Typography>
-
-					<Card>
-						<CardContent>
-							<Stack spacing={2}>
-								<TextField
-									multiline
-									minRows={3}
-									value={text}
-									onChange={(e) => setText(e.target.value)}
-									placeholder="Paste content here..."
-									fullWidth
-								/>
-
-								<Button
-									variant="contained"
-									startIcon={<AddIcon />}
-									onClick={addNote}
-									disabled={loading}
-								>
-									Add Note
-								</Button>
-							</Stack>
-						</CardContent>
-					</Card>
-
-					<NotesList
-						notes={notes}
-						onCopy={copyText}
-						onDelete={deleteNote}
-					/>
-				</Stack>
-			</Container>
-		</>
-	)
+          <NotesList notes={notes} onCopy={copyText} onDelete={deleteNote} />
+        </Stack>
+      </Container>
+    </>
+  )
 }
 
 export default App
