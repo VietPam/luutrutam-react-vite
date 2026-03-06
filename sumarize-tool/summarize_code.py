@@ -4,6 +4,16 @@ from pathlib import Path
 SOURCE_EXTENSIONS = [".ts", ".tsx"]
 OUTPUT_FOLDER = "output"
 OUTPUT_FILE = "all_code.txt"
+COMPRESS_OUTPUT = True
+
+def compress_code(content):
+    lines = content.splitlines()
+    cleaned = []
+    for line in lines:
+        stripped = line.strip()
+        if stripped:
+            cleaned.append(stripped)
+    return " ".join(cleaned)
 
 def collect_files(base_dir):
     files = []
@@ -20,6 +30,18 @@ def collect_files(base_dir):
                 files.append(path)
     return files
 
+def read_file_content(file_path):
+    if file_path.name == "worker-configuration.d.ts":
+        with open(file_path, "r", encoding="utf-8") as f:
+            lines = []
+            for i, line in enumerate(f):
+                if i >= 20:
+                    break
+                lines.append(line)
+            return "".join(lines)
+    with open(file_path, "r", encoding="utf-8") as f:
+        return f.read()
+
 def write_output(files, base_dir, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     output_path = Path(output_dir) / OUTPUT_FILE
@@ -27,9 +49,13 @@ def write_output(files, base_dir, output_dir):
     with open(output_path, "w", encoding="utf-8") as out:
         for file_path in sorted(files):
             relative_path = file_path.relative_to(base_dir)
-            out.write(f"\n/* FILE: {relative_path} */\n\n")
-            with open(file_path, "r", encoding="utf-8") as f:
-                out.write(f.read())
+            content = read_file_content(file_path)
+
+            if COMPRESS_OUTPUT:
+                content = compress_code(content)
+
+            out.write(f"\n/* FILE: {relative_path} */\n")
+            out.write(content)
             out.write("\n")
 
 def main():
