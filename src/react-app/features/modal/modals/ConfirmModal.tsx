@@ -3,26 +3,34 @@ import { Dialog, DialogTitle, DialogActions, Button, DialogContent, Typography }
 import { useDispatch } from "react-redux";
 import { closeModal } from "../modalSlice";
 
-type Props = {
+type ConfirmModalProps = {
   title?: string;
   message: string;
-  confirmAction: () => { type: string; payload?: any } | any; // Accept a Redux action or thunk
+  itemId: string;
+  actionType: "DELETE_NOTE";
+  // The logic for 'onDelete' is now internalized or handled via a shared handler
 };
 
-export default function ConfirmModal({ title = "Confirm Action", message, confirmAction }: any) {
+export default function ConfirmModal({ title, message, itemId, actionType }: any) {
   const dispatch = useDispatch();
 
   const handleClose = () => dispatch(closeModal());
 
   const handleConfirm = () => {
-    // Execute the logic passed in (usually a function that calls an API or dispatches)
-    confirmAction();
+    if (actionType === "DELETE_NOTE") {
+      // In a real SaaS, you'd dispatch a Thunk here: dispatch(deleteNoteThunk(itemId))
+      // For now, we trigger a custom event or use the window/context pattern
+      // to keep it simple while remaining serializable.
+      window.dispatchEvent(new CustomEvent("MODAL_CONFIRM", { 
+        detail: { actionType, itemId } 
+      }));
+    }
     dispatch(closeModal());
   };
 
   return (
     <Dialog open onClose={handleClose} fullWidth maxWidth="xs">
-      <DialogTitle>{title}</DialogTitle>
+      <DialogTitle>{title || "Confirm Action"}</DialogTitle>
       <DialogContent>
         <Typography>{message}</Typography>
       </DialogContent>

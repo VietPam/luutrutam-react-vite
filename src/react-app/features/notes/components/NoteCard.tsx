@@ -15,15 +15,15 @@ type Props = {
 function NoteCard({ note, onCopy, onDelete }: Props) {
   const dispatch = useDispatch();
 
-  const handleDelete = () => {
+  const handleDeleteClick = () => {
     dispatch(
       openModal({
         type: "confirm",
         props: {
           title: "Delete Note",
-          message: "Are you sure you want to delete this note? This cannot be undone.",
-          // We pass the execution logic here
-          confirmAction: () => onDelete(note.id),
+          message: "Permanent delete?",
+          itemId: note.id,
+          actionType: "DELETE_NOTE"
         },
       })
     );
@@ -33,12 +33,10 @@ function NoteCard({ note, onCopy, onDelete }: Props) {
     <Card variant="outlined">
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography sx={{ whiteSpace: "pre-wrap", flex: 1 }}>
-            {note.text}
-          </Typography>
+          <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word",  flex: 1 }}>{note.text}</Typography>
           <Box>
             <IconButton onClick={() => onCopy(note.text)}><ContentCopyIcon /></IconButton>
-            <IconButton color="error" onClick={handleDelete}><DeleteIcon /></IconButton>
+            <IconButton color="error" onClick={handleDeleteClick}><DeleteIcon /></IconButton>
           </Box>
         </Stack>
       </CardContent>

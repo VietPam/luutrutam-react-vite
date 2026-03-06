@@ -29,6 +29,19 @@ function App() {
   useEffect(() => {
     loadNotes()
   }, [])
+  
+  /* Add this inside the useEffect of App.tsx */
+	useEffect(() => {
+	const handleModalConfirm = (e: any) => {
+		const { actionType, itemId } = e.detail;
+		if (actionType === "DELETE_NOTE") {
+		deleteNote(itemId);
+		}
+	};
+
+	window.addEventListener("MODAL_CONFIRM", handleModalConfirm);
+	return () => window.removeEventListener("MODAL_CONFIRM", handleModalConfirm);
+	}, [notes]); // Re-bind when notes change so deleteNote has fresh scope
 
   const addNote = async () => {
     const value = text.trim()

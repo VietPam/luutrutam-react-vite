@@ -4,7 +4,12 @@ import { ModalType } from "./modalRegistry";
 
 interface ModalState {
   type: ModalType | null;
-  props: any; 
+  props: {
+    title?: string;
+    message?: string;
+    itemId?: string; // Data ID
+    actionType?: "DELETE_NOTE" | "ARCHIVE_NOTE"; // Enum-style strings
+  };
 }
 
 const initialState: ModalState = {
