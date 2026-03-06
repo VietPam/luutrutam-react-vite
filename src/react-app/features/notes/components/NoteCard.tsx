@@ -1,4 +1,3 @@
-/* FILE: src/react-app/features/notes/components/NoteCard.tsx */
 import { Card, CardContent, Stack, Typography, IconButton, Box } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -20,7 +19,7 @@ function NoteCard({ note, onCopy }: Props) {
         type: "confirm",
         props: {
           title: "Delete Note",
-          message: "Permanent delete?",
+          message: "Move this note to trash?",
           itemId: note.id,
           actionType: "DELETE_NOTE"
         },
@@ -32,10 +31,16 @@ function NoteCard({ note, onCopy }: Props) {
     <Card variant="outlined">
       <CardContent>
         <Stack direction="row" justifyContent="space-between" alignItems="center">
-          <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word",  flex: 1 }}>{note.text}</Typography>
+          <Typography sx={{ whiteSpace: "pre-wrap", wordBreak: "break-word", flex: 1 }}>
+            {note.text}
+          </Typography>
           <Box>
-            <IconButton onClick={() => onCopy(note.text)}><ContentCopyIcon /></IconButton>
-            <IconButton color="error" onClick={handleDeleteClick}><DeleteIcon /></IconButton>
+            <IconButton onClick={() => onCopy(note.text)}>
+              <ContentCopyIcon />
+            </IconButton>
+            <IconButton color="error" onClick={handleDeleteClick}>
+              <DeleteIcon />
+            </IconButton>
           </Box>
         </Stack>
       </CardContent>
